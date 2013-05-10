@@ -22,6 +22,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 ## Release History
 * 5/9/2013 - 0.0.2
 * 5/10/2013 - 0.0.4 (Better tests)
+* 5/10/2013 - 0.0.5 (gruntplugin keyword added to npm)
 
 ## License
 Copyright (c) 2013 Raphael Eidus  
