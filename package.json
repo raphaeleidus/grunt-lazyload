@@ -1,0 +1,37 @@
+{
+  "name": "grunt-lazyload",
+  "description": "Gruntplugin Lazy Loading",
+  "version": "0.0.1",
+  "homepage": "https://github.com/raphaeleidus/grunt-lazyload",
+  "author": {
+    "name": "Raphael Eidus",
+    "email": "raphaeleidus@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Raphael/grunt-lazyload.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raphaeleidus/grunt-lazyload/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/raphaeleidus/grunt-lazyload/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "lib/grunt-lazyload",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt nodeunit"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt-contrib-nodeunit": "~0.1.2",
+    "grunt-contrib-watch": "~0.2.0",
+    "grunt": "~0.4.1"
+  },
+  "keywords": []
+}
