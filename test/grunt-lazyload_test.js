@@ -94,9 +94,10 @@ exports['lazyload'] = {
       // tests here
       loader('PackageName', ['task1', 'task2', 'task3']);
       grunt.task.run('task2');
+      grunt.task.run('task1');
       var callCounts = grunt.getCurretCallCounts();
       test.equal(callCounts.registerTask, 3, 'registerTask should be called once');
-      test.equal(callCounts.run, 2, 'run should be called twice');
+      test.equal(callCounts.run, 3, 'run should be called three times');
       test.equal(callCounts.renameTask, 3, 'renameTask should be called once');
       test.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
       test.done();
