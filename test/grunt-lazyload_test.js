@@ -22,33 +22,35 @@ var grunt_lazyload = require('../lib/grunt-lazyload.js');
     test.ifError(value)
 */
 
-var gruntInjecter = function(test) { 
+var grunt, loader, gruntInjecter = function() {
+  var callCounts = {registerTask: 0};
   return {
     task: {
-      registerTask: function() { test.ok('registerTaskCalled'); }
-    }
+      registerTask: function() { callCounts.registerTask++; }
+    },
+    getCurretCallCounts: function() { return callCounts; }
   };
 };
 
 exports['lazyload'] = {
   setUp: function(done) {
     // setup here
+    grunt = gruntInjecter();
+    loader = grunt_lazyload.lazyload(grunt);
     done();
   },
   'single task register': function(test) {
     test.expect(1);
     // tests here
-    var grunt = gruntInjecter(test),
-        loader = grunt_lazyload.lazyload(grunt);
     loader('PackageName', 'task');
+    test.equal(grunt.getCurretCallCounts().registerTask, 1, 'registerTask should be called once');
     test.done();
   },
   'array': function(test) {
-    test.expect(3);
+    test.expect(1);
     // tests here
-    var grunt = gruntInjecter(test),
-        loader = grunt_lazyload.lazyload(grunt);
     loader('PackageName', ['task1', 'task2', 'task3']);
+    test.equal(grunt.getCurretCallCounts().registerTask, 3, 'registerTask should be called three times');
     test.done();
   }
 };
