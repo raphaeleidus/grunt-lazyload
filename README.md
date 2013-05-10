@@ -2,6 +2,8 @@
 
 Gruntplugin Lazy Loading
 
+[![Build Status](https://travis-ci.org/raphaeleidus/grunt-lazyload.png)](https://travis-ci.org/raphaeleidus/grunt-lazyload)
+
 ## Getting Started
 Install the module with: `npm install grunt-lazyload --save`
 
