@@ -3,7 +3,7 @@
 Gruntplugin Lazy Loading
 
 ## Getting Started
-Install the module with: `npm install grunt-lazyload`
+Install the module with: `npm install grunt-lazyload --save`
 
 ```javascript
 var lazyload = require('grunt-lazyload').lazyload(grunt);
@@ -21,6 +21,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 * 5/9/2013 - 0.0.2
+* 5/10/2013 - 0.0.4 (Better tests)
 
 ## License
 Copyright (c) 2013 Raphael Eidus  
