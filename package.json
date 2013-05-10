@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Raphael/grunt-lazyload.git"
+    "url": "git://github.com/raphaeleidus/grunt-lazyload.git"
   },
   "bugs": {
     "url": "https://github.com/raphaeleidus/grunt-lazyload/issues"
