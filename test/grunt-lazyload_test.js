@@ -22,15 +22,33 @@ var grunt_lazyload = require('../lib/grunt-lazyload.js');
     test.ifError(value)
 */
 
-exports['awesome'] = {
+var gruntInjecter = function(test) { 
+  return {
+    task: {
+      registerTask: function() { test.ok('registerTaskCalled'); }
+    }
+  };
+};
+
+exports['lazyload'] = {
   setUp: function(done) {
     // setup here
     done();
   },
-  'no args': function(test) {
+  'single task register': function(test) {
     test.expect(1);
     // tests here
-    test.equal(grunt_lazyload.awesome(), 'awesome', 'should be awesome.');
+    var grunt = gruntInjecter(test),
+        loader = grunt_lazyload.lazyload(grunt);
+    loader('PackageName', 'task');
     test.done();
   },
+  'array': function(test) {
+    test.expect(3);
+    // tests here
+    var grunt = gruntInjecter(test),
+        loader = grunt_lazyload.lazyload(grunt);
+    loader('PackageName', ['task1', 'task2', 'task3']);
+    test.done();
+  }
 };
