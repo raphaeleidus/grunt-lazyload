@@ -8,8 +8,10 @@ Gruntplugin Lazy Loading
 Install the module with: `npm install grunt-lazyload --save`
 
 ```javascript
-var lazyload = require('grunt-lazyload').lazyload(grunt);
-lazyload('grunt-contrib-jshint', 'jshint');
+var lazyloader = require('grunt-lazyload').lazyloader;
+
+lazyloader.init(grunt);
+lazyloader.load('grunt-contrib-jshint', 'jshint');
 ```
 
 ## Documentation
@@ -26,6 +28,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 * 5/10/2013 - 0.0.4 (Better tests)
 * 5/10/2013 - 0.0.6 (gruntplugin keyword added to npm)
 * 5/14/2013 - 0.1.0
+* 5/14/2013 - 0.2.0 (use an init function to pass in the grunt object)
 ## License
-Copyright (c) 2013 Raphael Eidus  
+Copyright (c) 2013 Raphael Eidus
 Licensed under the MIT license.

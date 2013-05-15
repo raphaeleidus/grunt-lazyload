@@ -1,6 +1,6 @@
 'use strict';
 
-var grunt_lazyload = require('../lib/grunt-lazyload.js');
+var grunt_lazyloader = require('../lib/grunt-lazyload.js').lazyloader;
 
 /*
   ======== A Handy Little Nodeunit Reference ========
@@ -22,7 +22,7 @@ var grunt_lazyload = require('../lib/grunt-lazyload.js');
     test.ifError(value)
 */
 
-var grunt, loader, gruntInjecter = function() {
+var grunt, gruntInjecter = function() {
   //testing non-functional implementation of grunt
   var callCounts = {registerTask: 0, run: 0, renameTask: 0, loadNpmTasks: 0};
   var tasks = [];
@@ -53,25 +53,25 @@ var grunt, loader, gruntInjecter = function() {
   };
 };
 
-exports['lazyload'] = {
+exports['lazyloader'] = {
   setUp: function(done) {
     // setup here
     grunt = gruntInjecter();
-    loader = grunt_lazyload.lazyload(grunt);
+    grunt_lazyloader.init(grunt);
     done();
   },
   'single task': {
     'register': function(test) {
       test.expect(1);
       // tests here
-      loader('PackageName', 'singleTask');
+      grunt_lazyloader.load('PackageName', 'singleTask');
       test.equal(grunt.getCurretCallCounts().registerTask, 1, 'registerTask should be called once');
       test.done();
     },
     'register and run': function(test) {
       test.expect(4);
       // tests here
-      loader('PackageName', 'singleTask');
+      grunt_lazyloader.load('PackageName', 'singleTask');
       grunt.task.run('singleTask');
       var callCounts = grunt.getCurretCallCounts();
       test.equal(callCounts.registerTask, 1, 'registerTask should be called once');
@@ -85,14 +85,14 @@ exports['lazyload'] = {
     'register': function(test) {
       test.expect(1);
       // tests here
-      loader('PackageName', ['task1', 'task2', 'task3']);
+      grunt_lazyloader.load('PackageName', ['task1', 'task2', 'task3']);
       test.equal(grunt.getCurretCallCounts().registerTask, 3, 'registerTask should be called three times');
       test.done();
     },
     'register and run': function(test) {
       test.expect(4);
       // tests here
-      loader('PackageName', ['task1', 'task2', 'task3']);
+      grunt_lazyloader.load('PackageName', ['task1', 'task2', 'task3']);
       grunt.task.run('task2');
       grunt.task.run('task1');
       var callCounts = grunt.getCurretCallCounts();
