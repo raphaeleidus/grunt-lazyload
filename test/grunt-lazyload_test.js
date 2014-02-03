@@ -28,7 +28,7 @@ var grunt, gruntInjecter = function() {
   var tasks = [];
   return {
     task: {
-      registerTask: function(taskName, description, func) { 
+      registerTask: function(taskName, description, func) {
         callCounts.registerTask++;
         tasks.push({name:taskName, task: func});
       },
