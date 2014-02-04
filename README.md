@@ -19,18 +19,18 @@ grunt.lazyLoadNpmTasks('grunt-contrib-jshint', 'jshint');
 _(Coming soon)_
 
 ## Examples
-*Adding lazyloading to grunt:*
+### Adding lazyloading to grunt:
 ```javascript
 require('grunt-lazyload')(grunt);
 ```
 This is not truely a gruntplugin but a node module that adds an extra method to grunt to allow lazy loading so you have to pass it an instance of grunt for it to modify
 
-*Lazy loading a library with a single task:*
+### Lazy loading a library with a single task:
 ```javascript
 grunt.lazyLoadNpmTasks('grunt-contrib-jshint', 'jshint');
 ```
 
-*Lazy loading a library with multiple tasks:*
+### Lazy loading a library with multiple tasks:
 ```javascript
 grunt.lazyLoadNpmTasks('grunt-some-plugin', ['task1', 'task2', 'task3']);
 ```
@@ -46,6 +46,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 * 5/10/2013  - 0.0.6 (gruntplugin keyword added to npm)
 * 5/10/2013  - 0.0.4 (Better tests)
 * 5/9/2013   - 0.0.2
+
 ## License
 Copyright (c) 2013 Raphael Eidus
 Licensed under the MIT license.
