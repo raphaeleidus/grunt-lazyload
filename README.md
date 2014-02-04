@@ -41,6 +41,7 @@ grunt.lazyLoadNpmTasks('grunt-some-plugin', ['task1', 'task2', 'task3']);
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
+* 2/4/2014   - 1.0.1 (eagerload for the --help screen)
 * 2/4/2014   - 1.0.0 (simplify code and improve api)
 * 2/3/2014   - 0.2.2 (fix multitarget/paramater passing bug)
 * 5/14/2013  - 0.2.0 (use an init function to pass in the grunt object)
