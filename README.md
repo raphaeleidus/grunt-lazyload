@@ -2,37 +2,37 @@
 
 Gruntplugin Lazy Loading
 
+_The Api has been changed to extend the grunt object, rather than provide a new wrapping object. For documentation on the old api (v0.2.2 and below) go here: [v0.2.2](https://github.com/raphaeleidus/grunt-lazyload/tree/v0.2.2)_
+
 [![Build Status](https://travis-ci.org/raphaeleidus/grunt-lazyload.png)](https://travis-ci.org/raphaeleidus/grunt-lazyload)
 
 ## Getting Started
 Install the module with: `npm install grunt-lazyload --save`
 
 ```javascript
-var lazyloader = require('grunt-lazyload').lazyloader;
-lazyloader.init(grunt);
+require('grunt-lazyload')(grunt);
 
-lazyloader.load('grunt-contrib-jshint', 'jshint');
+grunt.lazyLoadNpmTasks('grunt-contrib-jshint', 'jshint');
 ```
 
 ## Documentation
 _(Coming soon)_
 
 ## Examples
-*Setting up a lazyloader instance:*
+*Adding lazyloading to grunt:*
 ```javascript
-var lazyloader = require('grunt-lazyload').lazyloader;
-lazyloader.init(grunt);
+require('grunt-lazyload')(grunt);
 ```
-This is not truely a gruntplugin but a node module that adds an interface around grunt to allow lazy loading so you have to pass it an instance of grunt
+This is not truely a gruntplugin but a node module that adds an extra method to grunt to allow lazy loading so you have to pass it an instance of grunt for it to modify
 
 *Lazy loading a library with a single task:*
 ```javascript
-lazyloader.load('grunt-contrib-jshint', 'jshint');
+grunt.lazyLoadNpmTasks('grunt-contrib-jshint', 'jshint');
 ```
 
 *Lazy loading a library with multiple tasks:*
 ```javascript
-lazyloader.load('grunt-some-plugin', ['task1', 'task2', 'task3']);
+grunt.lazyLoadNpmTasks('grunt-some-plugin', ['task1', 'task2', 'task3']);
 ```
 
 ## Contributing
