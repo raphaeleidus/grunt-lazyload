@@ -7,6 +7,7 @@ _The Api has been changed to extend the grunt object, rather than provide a new 
 [![Build Status](https://travis-ci.org/raphaeleidus/grunt-lazyload.png)](https://travis-ci.org/raphaeleidus/grunt-lazyload)
 [![NPM version](https://badge.fury.io/js/grunt-lazyload.png)](http://badge.fury.io/js/grunt-lazyload)
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
+[![Code Climate](https://codeclimate.com/github/raphaeleidus/grunt-lazyload.png)](https://codeclimate.com/github/raphaeleidus/grunt-lazyload)
 
 ## Getting Started
 Install the module with: `npm install grunt-lazyload --save`
