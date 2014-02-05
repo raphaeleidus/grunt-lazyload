@@ -131,5 +131,22 @@ exports['lazyloader'] = {
       test.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
       test.done();
     }
+  },
+  'eager load for --help': {
+    'register': function(test) {
+      var callCounts;
+      test.expect(4);
+      process.argv.push('--help');
+      grunt.mockNpmTask('PackageName', 'singleTask', function() {
+        test.ok('called');
+      });
+      grunt.lazyLoadNpmTasks('PackageName', 'singleTask');
+      grunt.task.run('singleTask');
+      callCounts = grunt.getCurretCallCounts();
+      test.equal(callCounts.registerTask, 1, 'registerTask should have been called once');
+      test.equal(callCounts.run, 1, 'run should have only been called once');
+      test.equal(callCounts.renameTask, 0, 'renameTask should not have been called');
+      test.done();
+    }
   }
 };
