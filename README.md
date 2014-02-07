@@ -25,7 +25,8 @@ Lazy loading npm tasks means making every grunt run noticibly faster. For one of
 ![Before Lazy Loading](screenshots/no-lazyloading.png)
 #### After Lazy Loading
 ![After Lazy Loading](screenshots/with-lazyloading.png)
-(Image captured with [time-grunt](https://github.com/sindresorhus/time-grunt))
+
+_(Image captured with [time-grunt](https://github.com/sindresorhus/time-grunt))_
 
 Another big win is if you are using grunt in conjunction with Jenkins to do your deploys. If you are lazy loading npm modules, modules that wont get triggered dont event need to be installed. So when jenkins starts running a job it runs `npm install --production` and only downloads the production dependencies and not the dev dependencies like `grunt-contrib-watch`. This means the my `npm install` step during my deploys dropped from about 30 seconds to about 15. This was a big win for me and my team.
 
