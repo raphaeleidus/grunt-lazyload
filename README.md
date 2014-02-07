@@ -19,7 +19,7 @@ grunt.lazyLoadNpmTasks('grunt-contrib-jshint', 'jshint');
 ```
 
 ## Documentation
-Lazy loading npm tasks means making every grunt run noticibly faster. For one of my projects if shaves 400ms off every run. Which when you want to just concat the file, is noticable. Or when you are trying to make your deploys as fast as possible 400ms here can help keep things snappy.
+Lazy loading npm tasks means making every grunt run noticibly faster. For one of my projects it shaves almost 400ms off every run. Which when you want to just concat the file, is noticable. Or when you are trying to make your deploys as fast as possible, 400ms here can help keep things snappy.
 
 #### Before Lazy Loading
 ![Before Lazy Loading](screenshots/no-lazyloading.png)
