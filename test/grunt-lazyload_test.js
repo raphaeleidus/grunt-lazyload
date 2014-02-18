@@ -60,7 +60,7 @@ var grunt, gruntInjecter = function() {
     mockNpmTask: function(packageName, taskName, fn) {
       mocks[packageName] = { name: taskName, fn: fn };
     }
-  }
+  };
   return module;
 };
 
