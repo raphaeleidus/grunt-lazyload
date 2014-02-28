@@ -49,6 +49,8 @@ grunt.lazyLoadNpmTasks('grunt-contrib-jshint', 'jshint');
 grunt.lazyLoadNpmTasks('grunt-some-plugin', ['task1', 'task2', 'task3']);
 ```
 
+You must provide the task names that the plugin will define ahead of time.
+
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
