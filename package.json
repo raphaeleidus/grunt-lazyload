@@ -1,7 +1,7 @@
 {
   "name": "grunt-lazyload",
   "description": "Gruntplugin Lazy Loading",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "homepage": "https://github.com/raphaeleidus/grunt-lazyload",
   "author": {
     "name": "Raphael Eidus",
