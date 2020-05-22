@@ -1,70 +1,82 @@
 'use strict';
 
-var grunt_lazyload = require('../lib/grunt-lazyload.js');
-var assert = require("assert");
+const grunt_lazyload = require('../lib/grunt-lazyload.js');
+const assert = require('assert');
 
-var grunt, gruntInjecter = function() {
-  //testing non-functional implementation of grunt
-  var callCounts = {registerTask: 0, run: 0, renameTask: 0, loadNpmTasks: 0}
-    , tasks = []
-    , mocks = {}
-    , module;
-  module = {
+const gruntInjector = function() {
+  const callCounts = {
+    registerTask: 0,
+    run: 0,
+    renameTask: 0,
+    loadNpmTasks: 0
+  };
+  const tasks = {};
+  const mocks = {};
+  const module = {
+    options: {},
+    option(name) {
+      return module.options[name];
+    },
     task: {
       registerTask: function(taskName, description, fn) {
         callCounts.registerTask++;
-        tasks.push({name:taskName, description: description, task: fn});
+        tasks[taskName] = { name:taskName, description: description, task: fn };
       },
       run: function(taskName) {
-        var taskParams = taskName.split(':');
+        let taskParams = taskName.split(':');
         taskName = taskParams.shift();
         callCounts.run++;
-        var toRun = tasks.filter(function(t) { return t.name === taskName; });
-        toRun.forEach(function(t) { t.task.apply(t, taskParams); });
+        tasks[taskName].task.apply(tasks[taskName], taskParams);
       },
-      renameTask: function(orinalName, newName) {
+      renameTask: function(oldName, newName) {
         callCounts.renameTask++;
-        tasks.forEach(function(t) {
-          if(t.name === orinalName) {
-            t.name = newName;
-          }
-        });
+        tasks[newName] = tasks[oldName];
+        delete tasks[oldName];
       }
     },
     loadNpmTasks: function(packageName) {
-      if(mocks[packageName]) {
-        module.task.registerTask(mocks[packageName].name, 'mocked '+mocks[packageName].name, mocks[packageName].fn);
+      if (mocks[packageName]) {
+        mocks[packageName].forEach(task => {
+          module.task.registerTask(task.name, 'mocked '+task.name, task.fn);
+        });
       }
       callCounts.loadNpmTasks++;
     },
-    getCurretCallCounts: function() { return callCounts; },
+    getCurrentCallCounts: function() { return callCounts; },
     mockNpmTask: function(packageName, taskName, fn) {
-      mocks[packageName] = { name: taskName, fn: fn };
+      (mocks[packageName] = mocks[packageName] || []).push({ name: taskName, fn: fn });
     }
   };
   return module;
 };
 
-suite('lazyloader', function(){
+suite('lazyloader', function() {
+  let grunt;
+
   setup(function(){
-    grunt = gruntInjecter();
+    grunt = gruntInjector();
     grunt_lazyload(grunt);
   });
 
   suite('single', function(){
     test('should register task', function(){
       grunt.lazyLoadNpmTasks('PackageName', 'singleTask');
-      assert.equal(grunt.getCurretCallCounts().registerTask, 1, 'registerTask should be called once');
+      assert.equal(grunt.getCurrentCallCounts().registerTask, 1, 'registerTask should be called once');
     });
 
     test('should register and run', function(){
+      let called = 0;
+
       grunt.lazyLoadNpmTasks('PackageName', 'singleTask');
+      grunt.mockNpmTask('PackageName', 'singleTask', () => called++);
       grunt.task.run('singleTask');
-      var callCounts = grunt.getCurretCallCounts();
-      assert.equal(callCounts.registerTask, 1, 'registerTask should be called once');
+
+      let callCounts = grunt.getCurrentCallCounts();
+      assert.equal(callCounts.registerTask, 2, 'registerTask should be called twice');
       assert.equal(callCounts.run, 2, 'run should be called twice');
       assert.equal(callCounts.renameTask, 1, 'renameTask should be called once');
       assert.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
+      assert.equal(called, 1, 'actual implementation should be called once');
     });
   });
 
@@ -87,15 +99,20 @@ suite('lazyloader', function(){
   suite('array of tasks', function(){
     test('should register all tasks', function(){
       grunt.lazyLoadNpmTasks('PackageName', ['task1', 'task2', 'task3']);
-      assert.equal(grunt.getCurretCallCounts().registerTask, 3, 'registerTask should be called three times');
+      assert.equal(grunt.getCurrentCallCounts().registerTask, 3, 'registerTask should be called three times');
     });
 
     test('should register and run', function(){
       grunt.lazyLoadNpmTasks('PackageName', ['task1', 'task2', 'task3']);
+      grunt.mockNpmTask('PackageName', 'task1', () => {});
+      grunt.mockNpmTask('PackageName', 'task2', () => {});
+      grunt.mockNpmTask('PackageName', 'task3', () => {});
+
       grunt.task.run('task2');
       grunt.task.run('task1');
-      var callCounts = grunt.getCurretCallCounts();
-      assert.equal(callCounts.registerTask, 3, 'registerTask should be called once');
+
+      let callCounts = grunt.getCurrentCallCounts();
+      assert.equal(callCounts.registerTask, 6, 'registerTask should be called six times');
       assert.equal(callCounts.run, 3, 'run should be called three times');
       assert.equal(callCounts.renameTask, 3, 'renameTask should be called once');
       assert.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
@@ -104,18 +121,18 @@ suite('lazyloader', function(){
 
   suite('--help', function(){
     test('should eager load task', function(){
-      var callCounts, taskCalled = false;
-      process.argv.push('--help');
-      grunt.mockNpmTask('PackageName', 'singleTask', function() {
-        taskCalled = true;
-      });
+      let called = 0;
+
+      grunt.options.help = true;
+      grunt.mockNpmTask('PackageName', 'singleTask', () => called++);
       grunt.lazyLoadNpmTasks('PackageName', 'singleTask');
       grunt.task.run('singleTask');
-      callCounts = grunt.getCurretCallCounts();
+
+      let callCounts = grunt.getCurrentCallCounts();
       assert.equal(callCounts.registerTask, 1, 'registerTask should have been called once');
       assert.equal(callCounts.run, 1, 'run should have only been called once');
       assert.equal(callCounts.renameTask, 0, 'renameTask should not have been called');
-      assert.ok(taskCalled, 'task called');
+      assert.equal(called, 1, 'task called once');
     });
   });
 });
