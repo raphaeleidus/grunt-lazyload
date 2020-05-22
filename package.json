@@ -22,15 +22,15 @@
   ],
   "main": "lib/grunt-lazyload",
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 8.0.0"
   },
   "scripts": {
     "test": "grunt mochacli"
   },
   "devDependencies": {
+    "grunt": "~0.4.2",
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-watch": "~0.5.3",
-    "grunt": "~0.4.2",
     "grunt-mocha-cli": "~1.6.0"
   },
   "keywords": [
