@@ -2,17 +2,20 @@
 
 const grunt_lazyload = require('../lib/grunt-lazyload.js');
 const assert = require('assert');
+const path = require('path');
 
 const gruntInjector = function() {
   const callCounts = {
     registerTask: 0,
     run: 0,
     renameTask: 0,
-    loadNpmTasks: 0
+    loadNpmTasks: 0,
+    _loadTasks: 0
   };
   const tasks = {};
   const mocks = {};
   const module = {
+    errors: [],
     options: {},
     option(name) {
       return module.options[name];
@@ -34,6 +37,16 @@ const gruntInjector = function() {
         delete tasks[oldName];
       }
     },
+    file: {
+      exists: function(tasksdir) {
+        return Object.keys(mocks).some(path => path.indexOf(tasksdir) >= 0);
+      }
+    },
+    log: {
+      error: function(message) {
+        module.errors.push(message);
+      }
+    },
     loadNpmTasks: function(packageName) {
       if (mocks[packageName]) {
         mocks[packageName].forEach(task => {
@@ -41,6 +54,14 @@ const gruntInjector = function() {
         });
       }
       callCounts.loadNpmTasks++;
+    },
+    _loadTasks: function (packageName) {
+      if (mocks[packageName]) {
+        mocks[packageName].forEach(task => {
+          module.task.registerTask(task.name, 'mocked '+task.name, task.fn);
+        });
+      }
+      callCounts._loadTasks++;
     },
     getCurrentCallCounts: function() { return callCounts; },
     mockNpmTask: function(packageName, taskName, fn) {
@@ -51,11 +72,31 @@ const gruntInjector = function() {
 };
 
 suite('lazyloader', function() {
-  let grunt;
+  let grunt, instance, $pathresolve;
 
   setup(function(){
     grunt = gruntInjector();
-    grunt_lazyload(grunt);
+    instance = grunt_lazyload(grunt);
+    instance._require = function (packageName) {
+      return function(grunt) {
+        grunt._loadTasks(packageName);
+      }
+    };
+    $pathresolve = path.resolve;
+    path.resolve = filepath => `resolved/${filepath}`;
+  });
+
+  teardown(function(){
+    path.resolve = $pathresolve;
+  });
+
+  suite('lazyload init', function(){
+    test('should only initialize once', function(){
+      let second = grunt_lazyload(grunt);
+      let third = grunt_lazyload(grunt);
+      assert.strictEqual(instance, second);
+      assert.strictEqual(second, third);
+    });
   });
 
   suite('single', function(){
@@ -77,6 +118,24 @@ suite('lazyloader', function() {
       assert.equal(callCounts.renameTask, 1, 'renameTask should be called once');
       assert.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
       assert.equal(called, 1, 'actual implementation should be called once');
+    });
+
+    test('repeated calls to the task should use already loaded implementation', function(){
+      let called = 0;
+
+      grunt.lazyLoadNpmTasks('PackageName', 'singleTask');
+      grunt.mockNpmTask('PackageName', 'singleTask', () => called++);
+      grunt.task.run('singleTask');
+      grunt.task.run('singleTask');
+      grunt.task.run('singleTask');
+      grunt.task.run('singleTask');
+
+      let callCounts = grunt.getCurrentCallCounts();
+      assert.equal(callCounts.registerTask, 2, 'registerTask should be called twice');
+      assert.equal(callCounts.run, 5, 'run should be called five times');
+      assert.equal(callCounts.renameTask, 1, 'renameTask should be called once');
+      assert.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
+      assert.equal(called, 4, 'actual implementation should be called four times');
     });
   });
 
@@ -116,6 +175,108 @@ suite('lazyloader', function() {
       assert.equal(callCounts.run, 3, 'run should be called three times');
       assert.equal(callCounts.renameTask, 3, 'renameTask should be called once');
       assert.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
+    });
+  });
+
+  suite('local task directories', function(){
+    test('lazyLoadTasks sets up list of pending tasks', function (){
+      grunt.mockNpmTask('resolved/somedir/grunt-cat.js', 'cat1', () => {});
+      grunt.lazyLoadTasks('somedir', {
+        'grunt-cat.js': ['cat1', 'cat2'],
+      });
+
+      assert.deepEqual(instance.pending, {
+        cat1: { directory: 'resolved/somedir', filename: 'grunt-cat.js' },
+        cat2: { directory: 'resolved/somedir', filename: 'grunt-cat.js' }
+      });
+    });
+
+    test('lazyLoadTasks can be called multiple times', function(){
+      grunt.mockNpmTask('resolved/somedir/grunt-cat.js', 'cat1', () => {});
+      grunt.lazyLoadTasks('somedir', {
+        'grunt-cat.js': ['cat1', 'cat2'],
+      });
+      grunt.lazyLoadTasks('somedir', {
+        'grunt-dog.js': ['dog1'],
+        'grunt-hamster.js': ['hamster1']
+      });
+
+      assert.deepEqual(instance.pending, {
+        cat1: { directory: 'resolved/somedir', filename: 'grunt-cat.js' },
+        cat2: { directory: 'resolved/somedir', filename: 'grunt-cat.js' },
+        dog1: { directory: 'resolved/somedir', filename: 'grunt-dog.js' },
+        hamster1: { directory: 'resolved/somedir', filename: 'grunt-hamster.js' }
+      });
+    });
+
+    test('lazyLoadTasks logs a grunt error if the directory does not exist', function (){
+      grunt.lazyLoadTasks('somedir', {
+        'grunt-cat.js': ['cat1', 'cat2'],
+      });
+
+      assert.deepEqual(grunt.errors, [
+        'Tasks directory "resolved/somedir" not found.'
+      ]);
+    });
+
+    test('should register and run task', function(){
+      let called = 0;
+      grunt.mockNpmTask('resolved/somedir/grunt-cat.js', 'cat1', () => called++);
+      grunt.lazyLoadTasks('somedir', {
+        'grunt-cat.js': ['cat1'],
+      });
+
+      grunt.task.run('cat1');
+
+      let callCounts = grunt.getCurrentCallCounts();
+      assert.equal(callCounts.registerTask, 2, 'registerTask should be called twice');
+      assert.equal(callCounts.run, 2, 'run should be called twice');
+      assert.equal(callCounts.renameTask, 1, 'renameTask should be called once');
+      assert.equal(callCounts.loadNpmTasks, 0);
+      assert.equal(callCounts.loadNpmTasks, 0);
+      assert.equal(callCounts._loadTasks, 1);
+      assert.equal(called, 1);
+    });
+
+    test('a file defining multiple tasks should only be loaded once', function(){
+      let called = 0;
+      grunt.mockNpmTask('resolved/somedir/grunt-cat.js', 'cat1', () => called++);
+      grunt.mockNpmTask('resolved/somedir/grunt-cat.js', 'cat2', () => called++);
+      grunt.lazyLoadTasks('somedir', {
+        'grunt-cat.js': ['cat1', 'cat2'],
+      });
+
+      grunt.task.run('cat1');
+      grunt.task.run('cat2');
+      grunt.task.run('cat1');
+      grunt.task.run('cat2');
+
+      assert.deepEqual(grunt.getCurrentCallCounts(), {
+        registerTask: 4,
+        run: 5,
+        renameTask: 2,
+        loadNpmTasks: 0,
+        _loadTasks: 1
+      });
+      assert.equal(called, 4);
+    });
+
+    test('lazyLoadTasks can be called multiple times', function(){
+      grunt.mockNpmTask('resolved/somedir/grunt-cat.js', 'cat1', () => {});
+      grunt.lazyLoadTasks('somedir', {
+        'grunt-cat.js': ['cat1', 'cat2'],
+      });
+      grunt.lazyLoadTasks('somedir', {
+        'grunt-dog.js': ['dog1'],
+        'grunt-hamster.js': ['hamster1']
+      });
+
+      assert.deepEqual(instance.pending, {
+        cat1: { directory: 'resolved/somedir', filename: 'grunt-cat.js' },
+        cat2: { directory: 'resolved/somedir', filename: 'grunt-cat.js' },
+        dog1: { directory: 'resolved/somedir', filename: 'grunt-dog.js' },
+        hamster1: { directory: 'resolved/somedir', filename: 'grunt-hamster.js' }
+      });
     });
   });
 
