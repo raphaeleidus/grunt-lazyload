@@ -80,7 +80,7 @@ suite('lazyloader', function() {
     instance._require = function (packageName) {
       return function(grunt) {
         grunt._loadTasks(packageName);
-      }
+      };
     };
     $pathresolve = path.resolve;
     path.resolve = filepath => `resolved/${filepath}`;

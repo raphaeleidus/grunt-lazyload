@@ -11,5 +11,12 @@
   "unused": true,
   "boss": true,
   "eqnull": true,
-  "node": true
+  "node": true,
+  "esnext": true,
+  "globals": {
+    "suite": false,
+    "test": false,
+    "setup": false,
+    "teardown": false
+  }
 }
