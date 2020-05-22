@@ -10,7 +10,7 @@ const gruntInjector = function() {
     run: 0,
     renameTask: 0,
     loadNpmTasks: 0,
-    _loadTasks: 0
+    _loadLocalTasks: 0
   };
   const tasks = {};
   const mocks = {};
@@ -55,13 +55,13 @@ const gruntInjector = function() {
       }
       callCounts.loadNpmTasks++;
     },
-    _loadTasks: function (packageName) {
+    _loadLocalTasks: function (packageName) {
       if (mocks[packageName]) {
         mocks[packageName].forEach(task => {
           module.task.registerTask(task.name, 'mocked '+task.name, task.fn);
         });
       }
-      callCounts._loadTasks++;
+      callCounts._loadLocalTasks++;
     },
     getCurrentCallCounts: function() { return callCounts; },
     mockNpmTask: function(packageName, taskName, fn) {
@@ -79,7 +79,7 @@ suite('lazyloader', function() {
     instance = grunt_lazyload(grunt);
     instance._require = function (packageName) {
       return function(grunt) {
-        grunt._loadTasks(packageName);
+        grunt._loadLocalTasks(packageName);
       };
     };
     $pathresolve = path.resolve;
@@ -112,12 +112,14 @@ suite('lazyloader', function() {
       grunt.mockNpmTask('PackageName', 'singleTask', () => called++);
       grunt.task.run('singleTask');
 
-      let callCounts = grunt.getCurrentCallCounts();
-      assert.equal(callCounts.registerTask, 2, 'registerTask should be called twice');
-      assert.equal(callCounts.run, 2, 'run should be called twice');
-      assert.equal(callCounts.renameTask, 1, 'renameTask should be called once');
-      assert.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
-      assert.equal(called, 1, 'actual implementation should be called once');
+      assert.deepEqual(grunt.getCurrentCallCounts(), {
+        registerTask: 2,
+        run: 2,
+        renameTask: 1,
+        loadNpmTasks: 1,
+        _loadLocalTasks: 0
+      });
+      assert.equal(called, 1);
     });
 
     test('repeated calls to the task should use already loaded implementation', function(){
@@ -130,12 +132,35 @@ suite('lazyloader', function() {
       grunt.task.run('singleTask');
       grunt.task.run('singleTask');
 
-      let callCounts = grunt.getCurrentCallCounts();
-      assert.equal(callCounts.registerTask, 2, 'registerTask should be called twice');
-      assert.equal(callCounts.run, 5, 'run should be called five times');
-      assert.equal(callCounts.renameTask, 1, 'renameTask should be called once');
-      assert.equal(callCounts.loadNpmTasks, 1, 'loadNpmTasks should be called once');
-      assert.equal(called, 4, 'actual implementation should be called four times');
+      assert.deepEqual(grunt.getCurrentCallCounts(), {
+        registerTask: 2,
+        run: 5,
+        renameTask: 1,
+        loadNpmTasks: 1,
+        _loadLocalTasks: 0
+      });
+      assert.equal(called, 4);
+    });
+
+    test('should run a renamed task', function(){
+      let called = 0;
+
+      grunt.lazyLoadNpmTasks('PackageName', 'singleTask');
+      grunt.mockNpmTask('PackageName', 'singleTask', () => called++);
+      grunt.task.renameTask('singleTask', 'anotherOne');
+      //grunt.task.renameTask('anotherOne', 'myFavoriteTask');
+
+      grunt.task.run('anotherOne');
+      //grunt.task.run('myFavoriteTask');
+
+      assert.deepEqual(grunt.getCurrentCallCounts(), {
+        registerTask: 3,
+        run: 2,
+        renameTask: 2,
+        loadNpmTasks: 1,
+        _loadLocalTasks: 0
+      });
+      assert.equal(called, 1);
     });
   });
 
@@ -228,13 +253,13 @@ suite('lazyloader', function() {
 
       grunt.task.run('cat1');
 
-      let callCounts = grunt.getCurrentCallCounts();
-      assert.equal(callCounts.registerTask, 2, 'registerTask should be called twice');
-      assert.equal(callCounts.run, 2, 'run should be called twice');
-      assert.equal(callCounts.renameTask, 1, 'renameTask should be called once');
-      assert.equal(callCounts.loadNpmTasks, 0);
-      assert.equal(callCounts.loadNpmTasks, 0);
-      assert.equal(callCounts._loadTasks, 1);
+      assert.deepEqual(grunt.getCurrentCallCounts(), {
+        registerTask: 2,
+        run: 2,
+        renameTask: 1,
+        loadNpmTasks: 0,
+        _loadLocalTasks: 1
+      });
       assert.equal(called, 1);
     });
 
@@ -256,7 +281,7 @@ suite('lazyloader', function() {
         run: 5,
         renameTask: 2,
         loadNpmTasks: 0,
-        _loadTasks: 1
+        _loadLocalTasks: 1
       });
       assert.equal(called, 4);
     });
@@ -289,11 +314,14 @@ suite('lazyloader', function() {
       grunt.lazyLoadNpmTasks('PackageName', 'singleTask');
       grunt.task.run('singleTask');
 
-      let callCounts = grunt.getCurrentCallCounts();
-      assert.equal(callCounts.registerTask, 1, 'registerTask should have been called once');
-      assert.equal(callCounts.run, 1, 'run should have only been called once');
-      assert.equal(callCounts.renameTask, 0, 'renameTask should not have been called');
-      assert.equal(called, 1, 'task called once');
+      assert.deepEqual(grunt.getCurrentCallCounts(), {
+        registerTask: 1,
+        run: 1,
+        renameTask: 0,
+        loadNpmTasks: 1,
+        _loadLocalTasks: 0
+      });
+      assert.equal(called, 1);
     });
   });
 });
