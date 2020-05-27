@@ -1,7 +1,7 @@
 {
   "name": "grunt-lazyload",
   "description": "Gruntplugin Lazy Loading",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "homepage": "https://github.com/raphaeleidus/grunt-lazyload",
   "author": {
     "name": "Raphael Eidus",
@@ -22,15 +22,15 @@
   ],
   "main": "lib/grunt-lazyload",
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 8.0.0"
   },
   "scripts": {
     "test": "grunt mochacli"
   },
   "devDependencies": {
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-watch": "~0.5.3",
     "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "^2.1.0",
+    "grunt-contrib-watch": "~0.5.3",
     "grunt-mocha-cli": "~1.6.0"
   },
   "keywords": [

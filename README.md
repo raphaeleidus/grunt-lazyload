@@ -12,7 +12,7 @@ _The Api has been changed to extend the grunt object, rather than provide a new 
 ## Getting Started
 Install the module with: `npm install grunt-lazyload --save`
 
-```javascript
+```js
 require('grunt-lazyload')(grunt);
 
 grunt.lazyLoadNpmTasks('grunt-contrib-jshint', 'jshint');
@@ -34,29 +34,55 @@ Not everyone is using grunt the same way, but if you want your grunt to run a li
 
 ## Examples
 ### Adding lazyloading to grunt:
-```javascript
+```js
 require('grunt-lazyload')(grunt);
 ```
-This is not truely a gruntplugin but a node module that adds an extra method to grunt to allow lazy loading so you have to pass it an instance of grunt for it to modify
+This is not truly a grunt plugin, but a node module that adds extra methods to `grunt` to allow lazy loading. Pass the instance of grunt you intend to extend.
 
-### Lazy loading a library with a single task:
-```javascript
+### Lazy loading an NPM library with a single task:
+```js
 grunt.lazyLoadNpmTasks('grunt-contrib-jshint', 'jshint');
 ```
 
-### Lazy loading a library with multiple tasks:
-```javascript
+### Lazy loading an NPM library with multiple tasks:
+```js
 grunt.lazyLoadNpmTasks('grunt-some-plugin', ['task1', 'task2', 'task3']);
 ```
 
-You must provide the task names that the plugin will define ahead of time.
+### Lazy loading tasks from a local directory:
+```js
+grunt.lazyLoadTasks('localdir/tasks', {
+  'grunt-custombuild.js': 'custombuild',
+  'grunt-deploy.js': ['deploy'],
+  'grunt-customclean.js': ['clean', 'cleanall', 'reset'],
+});
+```
+
+In order to initialize lazy loading, you must define ahead of time the possible task names and where to load them from. For
+`lazyLoadNpmTasks`, specify the task (or tasks) that are provided by that NPM module. For a local directory of tasks,
+provide a hash, where each key is the _exact filename_ containing the tasks, and the value is the task (or tasks) it provides.
+
+### Task renaming
+
+```js
+grunt.lazyLoadNpmTasks('grunt-contrib-copy', 'copy');
+grunt.renameTask('copy', 'classic-copy');
+
+// Later
+grunt.task.run('classic-copy:somefiles');
+```
+
+Task renames are automatically tracked by the lazy loader and saved for later resolution. In this example, when you
+attempt to run `classic-copy`, the lazy loader will load `grunt-contrib-copy` and register the `copy` task as `classic-copy`.
+
+Automatic task renaming works for both NPM tasks and local task directories.
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
 * 5/10/2014  - 1.0.3 (eagerload for -h) - [PR#5](https://github.com/raphaeleidus/grunt-lazyload/pull/5)
-* 2/17/2014  - 1.0.2 (jshint error cleanup - [PR#4](https://github.com/raphaeleidus/grunt-lazyload/pull/4)) 
+* 2/17/2014  - 1.0.2 (jshint error cleanup - [PR#4](https://github.com/raphaeleidus/grunt-lazyload/pull/4))
 * 2/4/2014   - 1.0.1 (eagerload for the --help screen)
 * 2/4/2014   - 1.0.0 (simplify code and improve api)
 * 2/3/2014   - 0.2.2 (fix multitarget/paramater passing bug)
